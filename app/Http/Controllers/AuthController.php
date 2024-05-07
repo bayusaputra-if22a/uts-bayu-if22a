@@ -3,8 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
-use DateTime;
-use DateTimeZone;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -29,16 +27,13 @@ class AuthController extends Controller
         $credential = $validator->validated();
         if (Auth::attempt($credential)) {
             $user = Auth::user();
-            $date = new DateTime('2024-05-07 07:00:00', new DateTimeZone('UTC'));
-            $timestamp = $date->getTimestamp();
-            $timestamp_end = $timestamp + 3600;
             $payload = [
                 'iss' => 'Laravel Bayu',
                 'role' => $user->role,
                 'id' => $user->id,
                 'name' => $user->name,
-                "iat" => 1714956887,
-                "exp" => 1746579287,
+                'iat' => now()->timestamp,
+                'nbf' => now()->timestamp + 3600,
             ];
             $jwt = JWT::encode($payload, env('JWT_SECRET_KEY'), 'HS256');
             return response()->json([
