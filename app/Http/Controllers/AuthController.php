@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
+use Laravel\Socialite\Facades\Socialite;
 
 class AuthController extends Controller
 {
@@ -32,21 +33,95 @@ class AuthController extends Controller
                 'role' => $user->role,
                 'id' => $user->id,
                 'name' => $user->name,
-                'iat' => now()->timestamp,
-                'nbf' => now()->timestamp + 3600,
+                'email' => $user->email,
+                'nbf' => now()->timestamp,
+                'iat' => now()->timestamp + 3600,
             ];
             $jwt = JWT::encode($payload, env('JWT_SECRET_KEY'), 'HS256');
             return response()->json([
                 'Bearer ' => $jwt
             ], 200);
-            return response()->json([
-                'success' => true,
-                'message' => 'Login success',
-            ], 200);
         }
         return response()->json([
             'success' => false,
-            'message' => 'Login failed',
+            'message' => 'Password atau email anda salah',
         ], 401);
+    }
+    public function register(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:6',
+        ]);
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => $validator->errors()
+            ], 400);
+        }
+        $input = $validator->validated();
+        $input['password'] = bcrypt($input['password']);
+        $user = User::create($input);
+        $payload = [
+            'iss' => 'Laravel Bayu',
+            'role' => $user->role,
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+            'nbf' => now()->timestamp,
+            'iat' => now()->timestamp + 3600,
+        ];
+        $jwt = JWT::encode($payload, env('JWT_SECRET_KEY'), 'HS256');
+        return response()->json([
+            'Bearer ' => $jwt
+        ], 200);
+    }
+
+    public function redirectToGoogle()
+    {
+        return Socialite::driver('google')->redirect();
+    }
+    public function handleGoogleCallback()
+    {
+        $user = Socialite::driver('google')->user();
+        $findUser = User::where('email', $user->email)->first();
+        if ($findUser) {
+            Auth::login($findUser);
+            $payload = [
+                'iss' => 'Laravel Bayu',
+                'role' => $findUser->role,
+                'id' => $findUser->id,
+                'name' => $findUser->name,
+                'email' => $findUser->email,
+                'nbf' => now()->timestamp,
+                'iat' => now()->timestamp + 3600,
+            ];
+            $jwt = JWT::encode($payload, env('JWT_SECRET_KEY'), 'HS256');
+            return response()->json([
+                'Bearer ' => $jwt,
+                'message' => 'Login Berhasil',
+            ], 200);
+        }
+        $newUser = User::create([
+            'name' => $user->name,
+            'email' => $user->email,
+            'password' => bcrypt($user->email),
+        ]);
+        Auth::login($newUser);
+        $payload = [
+            'iss' => 'Laravel Bayu',
+            'role' => $newUser->role,
+            'id' => $newUser->id,
+            'name' => $newUser->name,
+            'email' => $newUser->email,
+            'nbf' => now()->timestamp,
+            'iat' => now()->timestamp + 3600,
+        ];
+        $jwt = JWT::encode($payload, env('JWT_SECRET_KEY'), 'HS256');
+        return response()->json([
+            'Bearer ' => $jwt,
+            'message' => 'Login dan Register Berhasil',
+        ], 200);
     }
 }
