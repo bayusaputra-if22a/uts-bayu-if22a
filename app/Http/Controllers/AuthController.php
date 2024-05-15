@@ -84,6 +84,7 @@ class AuthController extends Controller
     }
     public function handleGoogleCallback()
     {
+        try {
         $user = Socialite::driver('google')->user();
         $findUser = User::where('email', $user->email)->first();
         if ($findUser) {
@@ -123,5 +124,8 @@ class AuthController extends Controller
             'Bearer ' => $jwt,
             'message' => 'Login dan Register Berhasil',
         ], 200);
+        } catch (\Exception $e) {
+            return redirect()->away('https://bayusaputra-if22a.000webhostapp.com/api/oauth/register');
+        }
     }
 }
