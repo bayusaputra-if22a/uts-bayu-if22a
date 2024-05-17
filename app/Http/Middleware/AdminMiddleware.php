@@ -6,6 +6,9 @@ use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 use Closure;
 use Illuminate\Http\Request;
+use JWTAuth;
+use Tymon\JWTAuth\Exceptions\JWTException;
+use Tymon\JWTAuth\Exceptions\TokenExpiredException;
 
 class AdminMiddleware
 {

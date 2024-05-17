@@ -34,8 +34,8 @@ class AuthController extends Controller
                 'id' => $user->id,
                 'name' => $user->name,
                 'email' => $user->email,
-                'nbf' => now()->timestamp,
-                'iat' => now()->timestamp + 3600,
+                'iat' => now()->timestamp,
+                'exp' => now()->timestamp + 3600
             ];
             $jwt = JWT::encode($payload, env('JWT_SECRET_KEY'), 'HS256');
             return response()->json([
@@ -52,7 +52,7 @@ class AuthController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:6',
+            'password' => 'required|string|min:5',
         ]);
         if ($validator->fails()) {
             return response()->json([
@@ -69,8 +69,8 @@ class AuthController extends Controller
             'id' => $user->id,
             'name' => $user->name,
             'email' => $user->email,
-            'nbf' => now()->timestamp,
-            'iat' => now()->timestamp + 3600,
+            'iat' => now()->timestamp,
+            'exp' => now()->timestamp + 3600
         ];
         $jwt = JWT::encode($payload, env('JWT_SECRET_KEY'), 'HS256');
         return response()->json([
@@ -125,7 +125,7 @@ class AuthController extends Controller
             'message' => 'Login dan Register Berhasil',
         ], 200);
         } catch (\Exception $e) {
-            return redirect()->away('https://bayusaputra-if22a.000webhostapp.com/api/oauth/register');
+            return redirect()->away('https://bayuif22a.ylladev.my.id/api/oauth/register');
         }
     }
 }

@@ -20,7 +20,8 @@ class ProductController extends Controller
                 'message' => 'Product not found'
             ], 404);
         }
-        return response()->json(Product::all(), 200);
+        $products = Product::join('categories', 'products.category_id', '=', 'categories.id')->select('products.id', 'products.name', 'products.description', 'products.price', 'products.image', 'products.expired_at', 'products.modified_by', 'products.created_at', 'products.updated_at', 'categories.name as category_name')->get();
+        return response()->json($products, 200);
     }
 
     public function show($id)
