@@ -26,21 +26,18 @@ class ProductController extends Controller
 
     public function show($id)
     {
+        if (!is_numeric($id)) {
+            return response()->json([
+               'message' => 'Invalid product ID. ID must be numeric.'
+            ], 422);
+        }
         $product = Product::find($id);
         if ($product) {
-            return response()->json([
-                'data' => [
-                    'success' => true,
-                    'product' => $product
-                ]
-            ], 200);
+            return response()->json($product, 200);
         } else {
             return response()->json([
-                'data' => [
-                    'success' => false,
-                    'product' => []
-                ]
-            ], 200);
+                'message' => 'Product not found'
+            ], 404);
         }
     }
 
@@ -73,7 +70,7 @@ class ProductController extends Controller
         }
         $imagePath = $request->file('image')->store('images', 'public');
         $product = new Product($validator->validated());
-        $product->image = $imagePath; 
+        $product->image = env('APP_URL'). '/storage/' . $imagePath; 
         $product->modified_by = $email;
         $product->save();
         return response()->json([
@@ -87,7 +84,7 @@ class ProductController extends Controller
             'description' => 'required',
             'price' => 'required|numeric|min:0',
             'category_id' => 'required',
-            'image' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
+            'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
             'expired_at' => 'required',
         ]);
         $jwt = $request->bearerToken();
@@ -112,7 +109,7 @@ class ProductController extends Controller
         if ($product) {
             $product->update($validator->validated());
             if ($request->hasFile('image')) {
-                $product->image = $imagePath;
+                $product->image = env('APP_URL'). '/storage/' . $imagePath;
                 $product->modified_by = $email;
                 $product->save();
             }

@@ -40,13 +40,13 @@ class CategoriesController extends Controller
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 422);
         }
-        $category_name = Category::where('name', $request->name)->first();
-        if ($category_name) {
-            return response()->json(['message' => 'Category name already exists'], 422);
-        }
         $category = Category::find($id);
         if (!$category) {
             return response()->json(['message' => 'Category not found'], 404);
+        }
+        $category_name = Category::where('name', $request->name)->first();
+        if ($category_name) {
+            return response()->json(['message' => 'Category name already exists'], 422);
         }
         $category->update($validator->validated());
         return response()->json([
