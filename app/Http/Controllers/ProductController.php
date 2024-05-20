@@ -49,7 +49,7 @@ class ProductController extends Controller
             'price' => 'required|numeric|min:0',
             'category_id' => 'required',
             'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'expired_at' => 'required',
+            'expired_at' => 'required|date',
         ]);
         $jwt = $request->bearerToken();
         $decoded = JWT::decode($jwt, new Key(env('JWT_SECRET_KEY'), 'HS256'));
@@ -85,7 +85,7 @@ class ProductController extends Controller
             'price' => 'required|numeric|min:0',
             'category_id' => 'required',
             'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'expired_at' => 'required',
+            'expired_at' => 'required|date',
         ]);
         $jwt = $request->bearerToken();
         $decoded = JWT::decode($jwt, new Key(env('JWT_SECRET_KEY'), 'HS256'));
